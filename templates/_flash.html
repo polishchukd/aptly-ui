@@ -1,0 +1,39 @@
+{# Shared flash/balloon partial - renders flashed messages and server-message placeholder #}
+<div class="balloon-container" id="balloonContainer">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, msg in messages %}
+            {% set cat = category or 'message' %}
+            {% if cat in ['error'] %}{% set cat = 'danger' %}{% endif %}
+            <div
+                class="balloon {{ 'danger' if cat in ['danger'] else ('success' if cat=='success' else ('warning' if cat=='warning' else 'info')) }}"
+                role="status">
+                <div class="balloon-icon"></div>
+                <div class="balloon-text">{{ msg }}</div>
+                <button
+                    class="balloon-close"
+                    aria-label="close">
+                    &times;
+                </button>
+            </div>
+        {% endfor %}
+    {% endif %}
+    {% endwith %}
+</div>
+{% set _flashed = get_flashed_messages(with_categories=true) %}
+{% if _flashed %}
+    {% set _cat, _msg = _flashed[0] %}
+    <div
+        id="server-message"
+        data-message="{{ _msg|e }}"
+        data-category="{{ (_cat or 'info')|e }}"
+        data-tab="{{ tab|e if tab is defined else ''|e }}">
+    </div>
+{% else %}
+    <div
+        id="server-message"
+        data-message=""
+        data-category="info"
+        data-tab="{{ tab|e if tab is defined else ''|e }}">
+    </div>
+{% endif %}

@@ -1,0 +1,733 @@
+<!-- aptly-ui.html -->
+
+<!DOCTYPE html>
+<html lang="ru">
+
+    <head>
+        <meta charset="UTF-8">
+        <title>Aptly-UI</title>
+
+        <script>
+            window.API_URL = "{{ api_url }}";
+            window.PUBLISH_ARCH = "{{ publish_arch }}";
+            window.PUBLISH_ORIGIN = "{{ publish_origin }}";
+            window.PUBLISH_LABEL = "{{ publish_label }}";
+            window.CURRENT_LANG = "{{ CURRENT_LANG }}";
+        </script>
+        <script type="application/json" id="i18n-data">{{ I18N | tojson | safe }}</script>
+        <link rel="stylesheet"
+              href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+        <link rel="stylesheet" href="/static/style.css">
+        <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    </head>
+
+    <body>
+
+        <div class="aptly-container">
+            <div class="window-header d-flex align-items-center justify-content-between">
+                <div class="lang-link">
+                    <select id="lang_select">
+                        <option value="ru" {% if CURRENT_LANG=='ru' %}selected{% endif %}>Русский</option>
+                        <option value="en" {% if CURRENT_LANG=='en' %}selected{% endif %}>English</option>
+                    </select>
+                </div>
+
+                {% if app_version %}
+                <div class="app-version">v{{ app_version }}</div>
+                {% endif %}
+
+                <div id="health_status" class="ms-auto d-flex align-items-center">
+                    <span
+                        id="health_api"
+                        class="badge bg-secondary">{{ _t('health.checking') }}
+                    </span>
+                </div>
+
+                <div class="logout-link">
+                    {% if current_user.is_root() %}
+                    <a href="/settings" class="header-link header-link--mr">{{ _t('settings.title') }}</a>
+                    {% endif %}
+                    <a href="/logout" class="header-link">{{ _t('nav.logout') }}</a>
+                </div>
+            </div>
+        <!-- Контейнер для всплывающих уведомлений (глобальный) -->
+        {% include '_flash.html' %}
+
+        <div class="content">
+            <!-- Вкладки перемещены в корень .content -->
+                <ul class="nav nav-tabs mb-3" id="aptlyTab" role="tablist">
+                {# Определяем первую доступную вкладку для установки active #}
+                {% set _first_active = None %}
+                {% if current_user.has_tab_access('copy') %}
+                    {% set _first_active = 'copy' %}
+                {% elif current_user.has_tab_access('create') %}
+                    {% set _first_active = 'create' %}
+                {% elif current_user.has_tab_access('upload') %}
+                    {% set _first_active = 'upload' %}
+                {% elif current_user.has_tab_access('delete_repo') %}
+                    {% set _first_active = 'delete_repo' %}
+                {% elif current_user.has_tab_access('delete') %}
+                    {% set _first_active = 'delete' %}
+                {% endif %}
+
+                {% if current_user.has_tab_access('copy') %}
+                <li class="nav-item" role="presentation">
+                    <button
+                        class="nav-link {% if _first_active=='copy' %}active{% endif %}"
+                        id="copy-package-tab"
+                        data-bs-toggle="tab"
+                        data-bs-target="#copy"
+                        type="button"
+                        role="tab"
+                        aria-controls="copy"
+                        aria-selected="true">
+                        {{ _t('tab.copy') }}
+                    </button>
+                </li>
+
+                {% endif %}
+                {% if current_user.has_tab_access('delete') %}
+                <li class="nav-item" role="presentation">
+                    <button
+                        class="nav-link {% if _first_active=='delete' %}active{% endif %}"
+                        id="delete-package-tab"
+                        data-bs-toggle="tab"
+                        data-bs-target="#delete"
+                        type="button"
+                        role="tab"
+                        aria-controls="delete"
+                        aria-selected="false">
+                        {{ _t('tab.delete') }}
+                    </button>
+                </li>
+
+                {% endif %}
+                {% if current_user.has_tab_access('upload') %}
+                <li class="nav-item" role="presentation">
+                    <button
+                        class="nav-link {% if _first_active=='upload' %}active{% endif %}"
+                        id="upload-package-tab"
+                        data-bs-toggle="tab"
+                        data-bs-target="#upload"
+                        type="button"
+                        role="tab"
+                        aria-controls="upload"
+                        aria-selected="false">
+                        {{ _t('tab.upload') }}
+                    </button>
+                </li>
+
+                {% endif %}
+                {% if current_user.has_tab_access('create') %}
+                <li class="nav-item" role="presentation">
+                    <button
+                        class="nav-link {% if _first_active=='create' %}active{% endif %}"
+                        id="create-repo-tab"
+                        data-bs-toggle="tab"
+                        data-bs-target="#create"
+                        type="button"
+                        role="tab"
+                        aria-controls="create"
+                        aria-selected="false">
+                        {{ _t('tab.create') }}
+                    </button>
+                </li>
+
+                {% endif %}
+                {% if current_user.has_tab_access('delete_repo') %}
+                <li class="nav-item" role="presentation">
+                    <button
+                        class="nav-link {% if _first_active=='delete_repo' %}active{% endif %}"
+                        id="delete-repo-tab"
+                        data-bs-toggle="tab"
+                        data-bs-target="#delete-repo"
+                        type="button"
+                        role="tab"
+                        aria-controls="delete-repo"
+                        aria-selected="false">
+                        {{ _t('tab.delete_repo') }}
+                    </button>
+                </li>
+
+                {% endif %}
+            </ul>
+            <div class="tab-content tab-content--mb20" id="aptlyTabContent">
+                    {% if current_user.has_tab_access('copy') %}
+                <div
+                    class="tab-pane fade {% if _first_active=='copy' %}show active{% endif %}"
+                    id="copy"
+                    role="tabpanel"
+                    aria-labelledby="copy-package-tab">
+                    <div class="layout">
+                        <div class="main-pane">
+                            <div class="side-window">
+                                <form id="copy_package_form" autocomplete="off">
+                                    <div class="form-group">
+                                        <datalist id="source_distribution_list"></datalist>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="source_repo">{{ _t('label.source_repo') }}
+                                            <span
+                                                class="help-icon"
+                                                data-help="{{ _t('help.copy.source_repo') }}">
+                                            </span>
+                                        </label>
+                                        <input type="text"
+                                               class="form-control"
+                                               id="source_repo"
+                                               name="source_repo"
+                                               list="source_repo_list"
+                                               autocomplete="off"
+                                               placeholder="bionic-main-3.17-stable"
+                                               required
+                                               data-filterable>
+                                        <datalist id="source_repo_list"></datalist>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="package_name">{{ _t('label.package_name') }}
+                                            <span
+                                                class="help-icon"
+                                                data-help="{{ _t('help.copy.package_name') }}">
+                                            </span>
+                                        </label>
+                                        <input type="text"
+                                               class="form-control"
+                                               id="package_name"
+                                               name="package_name"
+                                               list="package_name_list"
+                                               autocomplete="off"
+                                               placeholder="ecss-node"
+                                               required
+                                               data-filterable>
+                                        <datalist id="package_name_list"></datalist>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="version">{{ _t('label.version') }}
+                                            <span
+                                                class="help-icon"
+                                                data-help="{{ _t('help.copy.version') }}">
+                                            </span>
+                                        </label>
+                                        <input type="text"
+                                               class="form-control"
+                                               id="version"
+                                               name="version"
+                                               list="version_list"
+                                               autocomplete="off"
+                                               placeholder="14.15.16"
+                                               required
+                                               data-filterable>
+                                        <datalist id="version_list"></datalist>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="target_repo">{{ _t('label.target_repo') }}
+                                            <span
+                                                class="help-icon"
+                                                data-help="{{ _t('help.copy.target_repo') }}">
+                                            </span>
+                                        </label>
+                                        <input type="text"
+                                               class="form-control"
+                                               id="target_repo"
+                                               name="target_repo"
+                                               list="target_repo_list"
+                                               autocomplete="off"
+                                               placeholder="bionic-main-3.17-stable"
+                                               required
+                                               data-filterable>
+                                        <datalist id="target_repo_list"></datalist>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="target_distribution">{{ _t('label.distribution') }}
+                                            <span
+                                                class="help-icon"
+                                                data-help="{{ _t('help.copy.target_distribution') }}">
+                                            </span>
+                                        </label>
+                                        <input type="text"
+                                               class="form-control"
+                                               id="target_distribution"
+                                               name="target_distribution"
+                                               list="target_distribution_list"
+                                               placeholder="stable"
+                                               data-filterable>
+                                        <datalist id="target_distribution_list"></datalist>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="target_prefix">{{ _t('label.target_prefix') }}
+                                            <span
+                                                class="help-icon"
+                                                data-help="{{ _t('help.copy.target_prefix') }}">
+                                            </span>
+                                        </label>
+                                        <input type="text" class="form-control" id="target_prefix" name="target_prefix" placeholder="bionic/3.17">
+                                    </div>
+
+                                    <div class="btn-container">
+                                        <button
+                                            type="submit"
+                                            id="copy_submit"
+                                            class="btn btn-primary"
+                                            disabled>{{ _t('btn.copy') }}
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <aside class="side-pane">
+                            <div class="side-window">
+                                <!-- <div class="title">Команды</div> -->
+                                <label for="copy_command_box">{{ _t('label.commands') }}
+                                    <span
+                                        class="help-icon"
+                                        data-help="{{ _t('help.commands') }}">
+                                    </span>
+                                </label>
+                                <div class="command-box" id="copy_command_box">
+                                    <div id="copy_package_api" class="pre-line"></div>
+                                </div>
+                                <!-- <div class="title">Результат выполнения</div> -->
+                                <label for="copy_result_box">{{ _t('label.result') }}</label>
+                                <div class="command-box" id="copy_result_box">
+                                    <div id="copy_package_result" class="pre-line"></div>
+                                </div>
+                            </div>
+                        </aside>
+                    </div>
+                </div>
+                {% endif %}
+                {% if current_user.has_tab_access('delete_repo') %}
+                <div
+                    class="tab-pane fade {% if _first_active=='delete_repo' %}show active{% endif %}"
+                    id="delete-repo"
+                    role="tabpanel"
+                    aria-labelledby="delete-repo-tab">
+                    <div class="layout">
+                        <div class="main-pane">
+                            <div class="side-window">
+                                <div class="row delete-columns gutter-16">
+                                    <div class="col-12">
+                                        <label for="del_repos_filter_repo">{{ _t('label.repositories') }}
+                                            <span
+                                                class="help-icon"
+                                                data-help="{{ _t('help.delete.repos') }}">
+                                            </span>
+                                        </label>
+
+                                        <input id="del_repos_filter_repo"
+                                               type="text"
+                                               class="form-control list-filter"
+                                               placeholder="{{ _t('placeholder.filter') }}">
+
+                                        <ul id="del_repos_list_repo" class="list-group aptly-list"></ul>
+                                    </div>
+                                </div>
+
+                                <form id="delete_repo_form" autocomplete="off">
+                                    <div class="btn-container btn-column">
+                                        <div class="form-check form-switch d-flex form-switch-tight">
+                                            <input type="checkbox"
+                                                   class="form-check-input"
+                                                   id="delete_repo_force"
+                                                   name="delete_repo_force"
+                                                   role="switch"
+                                                   aria-checked="false">
+                                            <label class="form-check-label mb-0" for="delete_repo_force">{{ _t('delete.force') }}
+                                                <span
+                                                    class="help-icon"
+                                                    data-help="{{ _t('help.delete_repo_force') }}">
+                                                </span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-3 btn-container">
+                                        <button
+                                            id="delete_repo_submit"
+                                            class="btn btn-danger"
+                                            disabled>{{ _t('btn.delete') }}
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <aside class="side-pane">
+                            <div class="side-window">
+                                <label for="delete_repo_command_box">{{ _t('label.commands') }}
+                                    <span
+                                        class="help-icon"
+                                        data-help="{{ _t('help.commands') }}">
+                                    </span>
+                                </label>
+
+                                <div class="command-box" id="delete_repo_command_box">
+                                    <div id="delete_repo_api" class="pre-line"></div>
+                                </div>
+
+                                <label for="delete_repo_result_box">{{ _t('label.result') }}</label>
+                                <div class="command-box" id="delete_repo_result_box">
+                                    <div id="delete_repo_result" class="pre-line"></div>
+                                </div>
+                            </div>
+                        </aside>
+                      </div>
+                  </div>
+                {% endif %}
+                      {% if current_user.has_tab_access('delete') %}
+                 <div class="tab-pane fade{% if _first_active=='delete' %} show active{% endif %}"
+                     id="delete"
+                     role="tabpanel"
+                     aria-labelledby="delete-package-tab">
+
+                    <div class="layout">
+                        <div class="main-pane main-pane--full">
+                            <div class="side-window">
+                                <div class="row delete-columns gutter-16">
+                                    <div class="col-4">
+                                        <label for="del_repos_filter">{{ _t('label.repositories') }}
+                                            <span
+                                                class="help-icon"
+                                                data-help="{{ _t('help.delete.repos') }}">
+                                            </span>
+                                        </label>
+
+                                        <input id="del_repos_filter"
+                                               type="text"
+                                               class="form-control list-filter"
+                                               placeholder="{{ _t('placeholder.filter') }}">
+
+                                        <ul id="del_repos_list" class="list-group aptly-list"></ul>
+                                    </div>
+
+                                    <div class="col-4">
+                                        <label for="del_packages_filter">{{ _t('label.packages') }}
+                                            <span
+                                                class="help-icon"
+                                                data-help="{{ _t('help.delete.packages') }}">
+                                            </span>
+                                        </label>
+
+                                        <input id="del_packages_filter"
+                                               type="text"
+                                               class="form-control list-filter"
+                                               placeholder="{{ _t('placeholder.filter') }}">
+
+                                        <ul id="del_packages_list" class="list-group aptly-list"></ul>
+                                    </div>
+
+                                    <div class="col-4">
+                                        <label for="del_versions_filter">{{ _t('label.versions') }}
+                                            <span
+                                                class="help-icon"
+                                                data-help="{{ _t('help.delete.versions') }}">
+                                            </span>
+                                        </label>
+
+                                        <input id="del_versions_filter"
+                                               type="text"
+                                               class="form-control list-filter"
+                                               placeholder="{{ _t('placeholder.filter') }}">
+
+                                        <ul id="del_versions_list" class="list-group aptly-list"></ul>
+                                    </div>
+                                </div>
+
+                                <div class="mt-3">
+                                    <label for="delete_command_box">{{ _t('label.commands') }}
+                                        <span
+                                            class="help-icon"
+                                            data-help="{{ _t('help.commands') }}">
+                                        </span>
+                                    </label>
+
+                                    <div class="command-box-small">
+                                        <div id="delete_command_box" class="pre-line"></div>
+                                    </div>
+
+                                    <label for="delete_result_box">{{ _t('label.result') }}</label>
+                                    <div class="command-box-small">
+                                        <div id="delete_result_box" class="pre-line"></div>
+                                    </div>
+                                </div>
+
+                                <div class="mt-1 btn-container">
+                                    <button
+                                        id="delete_submit"
+                                        class="btn btn-danger"
+                                        disabled
+                                        {% if not current_user.has_tab_access('delete') %}
+                                        data-readonly="true"
+                                        style="opacity: 0.3; cursor: not-allowed; pointer-events: none;"
+                                        title="{{ _t('tooltip.insufficient_permissions_delete') }}"
+                                        {% endif %}>{{ _t('btn.delete') }}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                              {% endif %}
+                    </div>
+                </div>
+                {% if current_user.has_tab_access('upload') %}
+                <div
+                    class="tab-pane fade {% if _first_active=='upload' %}show active{% endif %}"
+                    id="upload"
+                    role="tabpanel"
+                    aria-labelledby="upload-package-tab">
+                    <div class="layout">
+                        <div class="main-pane">
+                            <div class="side-window">
+                                <form id="upload_package_form" enctype="multipart/form-data" autocomplete="off">
+                                    <div class="form-group">
+                                        <label for="deb_file">{{ _t('label.select_deb') }}</label>
+                                        <input type="file" class="form-control" id="deb_file" name="file" accept=".deb,.ddeb" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="upload_repo">{{ _t('label.upload_repo') }}
+                                            <span
+                                                class="help-icon"
+                                                data-help="{{ _t('help.upload_repo') }}">
+                                            </span>
+                                        </label>
+                                        <input type="text"
+                                               class="form-control"
+                                               id="upload_repo"
+                                               name="upload_repo"
+                                               list="upload_repo_list"
+                                               autocomplete="off"
+                                               placeholder="{{ _t('placeholder.example_repo','bionic-main-3.17-stable') }}"
+                                               required
+                                               data-filterable>
+                                        <datalist id="upload_repo_list"></datalist>
+                                    </div>
+                                    <div class="btn-container">
+                                        <button
+                                            type="submit"
+                                            id="upload_package_submit"
+                                            class="btn btn-primary">
+                                            {{ _t('btn.upload') }}
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <aside class="side-pane">
+                            <div class="side-window">
+                                <label for="upload_command_box">{{ _t('label.commands') }}</label>
+                                <div class="command-box" id="upload_command_box">
+                                    <div id="upload_package_api" class="pre-line"></div>
+                                </div>
+                                <label for="upload_result_box" class="label-mt8">{{ _t('label.result') }}</label>
+                                <div class="command-box" id="upload_result_box">
+                                    <div id="upload_package_result" class="pre-line"></div>
+                                </div>
+                            </div>
+                        </aside>
+                    </div>
+                </div>
+                {% endif %}
+                {% if current_user.has_tab_access('create') %}
+                <div
+                    class="tab-pane fade {% if _first_active=='create' %}show active{% endif %}"
+                    id="create"
+                    role="tabpanel"
+                    aria-labelledby="create-repo-tab">
+                    <div class="layout">
+                        <div class="main-pane">
+                            <div class="side-window">
+                                <form id="create_repo_form" autocomplete="off">
+                                    <div class="form-group">
+                                        <label for="name">{{ _t('label.create_name') }}
+                                            <span
+                                                class="help-icon"
+                                                data-help="{{ _t('help.create.name') }}">
+                                            </span>
+                                        </label>
+                                        <input type="text"
+                                               class="form-control"
+                                               id="name"
+                                               name="name"
+                                               placeholder="{{ _t('placeholder.example_repo','bionic-main-3.17-stable') }}"
+                                               required>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="component">{{ _t('label.component') }}
+                                            <span
+                                                class="help-icon"
+                                                data-help="{{ _t('help.create.component') }}">
+                                            </span>
+                                        </label>
+                                        <input type="text"
+                                               class="form-control"
+                                               id="component"
+                                               name="component"
+                                               placeholder="{{ _t('placeholder.component','main') }}"
+                                               required>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="distribution">{{ _t('label.distribution') }}
+                                            <span
+                                                class="help-icon"
+                                                data-help="{{ _t('help.create.distribution') }}">
+                                            </span>
+                                        </label>
+                                        <input type="text"
+                                               class="form-control"
+                                               id="distribution"
+                                               name="distribution"
+                                               placeholder="{{ _t('placeholder.distribution','stable') }}"
+                                               required>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="prefix">{{ _t('label.prefix') }}
+                                            <span
+                                                class="help-icon"
+                                                data-help="{{ _t('help.create.prefix') }}">
+                                            </span>
+                                        </label>
+                                        <input type="text"
+                                               class="form-control"
+                                               id="prefix"
+                                               name="prefix"
+                                               placeholder="{{ _t('placeholder.prefix','bionic/3.17') }}"
+                                               required>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="comment">{{ _t('label.comment') }}
+                                            <span
+                                                class="help-icon"
+                                                data-help="{{ _t('help.create.comment') }}">
+                                            </span>
+                                        </label>
+                                        <textarea
+                                            class="form-control-comment"
+                                            id="comment"
+                                            name="comment"
+                                            placeholder="{{ _t('placeholder.comment') }}">
+                                        </textarea>
+                                    </div>
+
+                                    <div class="btn-container">
+                                        <button
+                                            type="submit"
+                                            id="create_repo_submit"
+                                            class="btn btn-primary"
+                                            disabled>
+                                            {{ _t('btn.create') }}
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <aside class="side-pane">
+                            <div class="side-window">
+                                <label for="create_command_box">{{ _t('label.commands') }}
+                                    <span
+                                        class="help-icon"
+                                        data-help="{{ _t('help.commands') }}">
+                                    </span>
+                                </label>
+
+                                <div class="command-box" id="create_command_box">
+                                    <div id="create_repo_api" class="pre-line"></div>
+                                </div>
+
+                                <label for="create_result_box">{{ _t('label.result') }}</label>
+                                <div class="command-box" id="create_result_box">
+                                    <div id="create_repo_result" class="pre-line"></div>
+                                </div>
+                            </div>
+                        </aside>
+                    </div>
+                </div>
+                 {% endif %}
+            </div>
+        </div>
+    </div>
+    <!-- Modal подтверждения удаления -->
+    <div
+        class="modal fade"
+        id="deleteConfirmModal"
+        tabindex="-1"
+        aria-labelledby="deleteConfirmLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteConfirmLabel">{{ _t('modal.delete_confirm_title') }}</h5>
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close">
+                    </button>
+                </div>
+                <div class="modal-body" id="delete_modal_body">
+                    {{ _t('modal.delete_confirm_body') }}
+                </div>
+                <div class="modal-footer">
+                    <button
+                        type="button"
+                        class="btn btn-success"
+                        data-bs-dismiss="modal">
+                        {{ _t('btn.cancel') }}
+                    </button>
+                    <button
+                        type="button"
+                        class="btn btn-danger"
+                        id="confirm_delete_pack_btn">
+                        {{ _t('btn.delete') }}
+                    </button>
+                    <button
+                        type="button"
+                        class="btn btn-danger"
+                        id="confirm_delete_repo_btn"
+                        style="display:none;">
+                        {{ _t('btn.delete') }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="/static/aptly-ui.js?v={{ app_version }}"></script>
+        <script src="/static/balloons.js?v={{ app_version }}"></script>
+
+        <script>
+            document.getElementById('lang_select')?.addEventListener('change', function (e) {
+                const lang = e.target.value;
+
+                fetch('/set_lang', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({lang}),
+                    credentials: 'same-origin'
+                })
+                    .then(r => r.json())
+                    .then(j => {
+                        if (j && j.status === 'ok') {
+                            window.location.reload();
+                        } else {
+                            alert('Language switch failed');
+                        }
+                    })
+                    .catch(() => alert('Language switch failed'));
+            });
+        </script>
+
+    </body>
+
+</html>

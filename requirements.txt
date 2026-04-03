@@ -1,0 +1,5 @@
+flask
+Flask-Login
+gunicorn
+bcrypt
+requests

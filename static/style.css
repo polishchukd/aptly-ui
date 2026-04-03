@@ -1,0 +1,932 @@
+/* style.css */
+
+/* =============================
+   Список пользователей (user-list)
+   ============================= */
+.user-list {
+    max-height: 500px;
+    overflow-y: auto;
+    margin-bottom: 0;
+}
+
+.user-list .list-group-item {
+    min-height: 40px; /* как input */
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    font-size: 15px;
+}
+
+.user-list .btn {
+    padding: 6px 10px;
+    font-size: 13px;
+    width: auto;
+    min-width: 60px;
+    margin-top: 0;
+    margin-left: 0;
+}
+/* =============================
+    Блок :root
+    Назначение: декларация централизованных CSS‑переменных (палитра, размеры,
+    отступы, тени), используемых во всём UI. Позволяет быстро переопределять тему
+    без правки отдельных селекторов.
+    Использование: применяется автоматически ко всей странице.
+    Ограничения: значения должны быть валидными CSS; изменение ключевых переменных
+    (например —radius-md) влияет на множество элементов одновременно.
+   ============================= */
+:root {
+    --mac-accent: #007aff;
+    --mac-border: #d0d3d7;
+    --mac-bg: #f5f5f7;
+    --selection-bg: #007aff;
+    --selection-fg: #ffffff;
+    --btn-width: 180px;    /* Единая фиксированная ширина кнопок */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --shadow-soft: 0 20px 40px #00000014;
+    --shadow-btn: 0 1px 1px #0000000f;
+    --color-bg-window: #fff;
+    --color-bg-command: #f5f5f5;
+    --color-border-light: #ddd;
+    --color-danger: #dc3545;
+    --color-danger-hover: #c82333;
+    --color-danger-active: #bd2130;
+    --color-success: #28a745;
+    --color-success-hover: #218838;
+    --color-success-active: #1e7e34;
+    --color-text-muted: #6a6a6a;
+    --color-text-dark: #333;
+    --color-text-mid: #3a3a3c;
+    --body-grad-top: #f6f7f9;
+    --body-grad-bottom: #eef0f3;
+    --focus-ring: 0 0 0 3px #007aff26;
+    --header-height: 32px;
+    --list-height: 280px;
+    --btn-padding: 10px 16px;
+    --input-padding: 10px 12px;
+    --mono-font: monospace;
+    --base-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+/* =============================
+    Блок .alert
+    Назначение: оформление flash‑сообщений Flask (информационные / статусные).
+    Использование: элементы с классом .alert, выводимые шаблоном.
+   ============================= */
+.alert {
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+}
+
+/* =============================================
+    Внешняя обёртка приложения (.aptly-container):
+    Центрирование, ограничение максимальной ширины, визуальная карточка.
+   ============================================= */
+.aptly-container {
+    width: 95%;    /* Ширина относительно окна браузера */
+    max-width: 1400px;    /* Максимум (на широких экранах) */
+    min-height: 95vh;    /* 90% высоты экрана (вместо 800px) */
+    margin: auto;    /* Отступ сверху/снизу для красоты */
+    border: 1px solid var(--mac-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-soft);
+    padding: 0;
+    overflow: hidden;
+    background: var(--color-bg-window);
+    box-sizing: border-box;    /* Чтобы padding/border не увеличивали размер */
+}
+
+/* =============================
+    Блок .btn
+    Назначение: базовый вид всех кнопок (копирование, создание, удаление, подтверждения).
+    Использование: задаётся поверх Bootstrap, унифицирует ширину, тень и цвет.
+    Особенности: цветовые модификаторы (.btn-danger, .btn-success) переопределяют фон.
+   ============================= */
+.btn {
+    background: var(--mac-accent);
+    color: white;
+    border: none;
+    padding: var(--btn-padding);
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 10px;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-btn);
+    width: var(--btn-width);
+    text-align: center;
+}
+
+/* =============================
+    Состояние .btn:active
+    Назначение: визуальная реакция при удержании кнопки мышью / активном фокусе.
+   ============================= */
+.btn:active {
+    background: #0059d0;    /* жёстко прописан; можно вынести в переменную */
+}
+
+/* =============================
+    Состояние .btn:hover
+    Назначение: подсветка кнопки при наведении курсора, усиливает интерактивность.
+   ============================= */
+.btn:hover {
+    background: #0a67ff;
+}
+
+/* =============================
+    Блок .command-box
+    Назначение: контейнеры вывода сформированных curl команд и результатов операций.
+    Использование: <pre>/<div>/textarea с классом .command-box в правой панели.
+   ============================= */
+.command-box {
+    background: var(--color-bg-command);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-md);
+    padding: 10px;
+    margin-bottom: 16px;
+    font-family: var(--mono-font);
+    font-size: 14px;
+    width: 100%;    /* занимает всю ширину родителя */
+    box-sizing: border-box;    /* учитывает padding в ширине */
+    /* гибкое поведение внутри вертикального flex-контейнера */
+    display: block;
+    flex: 1 1 auto;
+    min-height: 64px; /* важно для корректной работы в flex-контейнерах; минимальная высота полей command-box = 64px */
+    max-height: 287px;
+    /* поведение переполнения: вертикальная прокрутка, запрещена горизонтальная */
+    overflow-x: hidden;
+    overflow-y: auto;
+    /* перенос длинных строк вместо расширения контейнера */
+    /* white-space: pre-wrap; */
+    word-break: break-word;
+    overflow-wrap: anywhere;
+}
+
+.command-box-small {
+    background: var(--color-bg-command);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-md);
+    padding: 10px;
+    margin-bottom: 16px;
+    font-family: var(--mono-font);
+    font-size: 14px;
+    width: 100%;    /* занимает всю ширину родителя */
+    box-sizing: border-box;    /* учитывает padding в ширине */
+    /* гибкое поведение внутри вертикального flex-контейнера */
+    display: block;
+    flex: 1 1 auto;
+    min-height: 70px; /* важно для корректной работы в flex-контейнерах; минимальная высота полей command-box = 64px */
+    max-height: 70px;
+    /* поведение переполнения: вертикальная прокрутка, запрещена горизонтальная */
+    overflow-x: hidden;
+    overflow-y: auto;
+    /* перенос длинных строк вместо расширения контейнера */
+    /* white-space: pre-wrap; */
+    word-break: break-word;
+    overflow-wrap: anywhere;
+}
+
+/* =============================
+    Блок .content
+    Назначение: внутренний отступ основного контента карточки приложения.
+   ============================= */
+.content {
+    padding: 24px 24px 24px 24px;
+}
+
+/* =============================
+    Блок .form-control / .form-select
+    Назначение: единый стиль текстовых полей и select элементов.
+    Использование: формы копирования, создания и фильтров.
+   ============================= */
+.form-control,
+.form-select {
+    width: 100%;
+    padding: var(--input-padding);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    border: 1px solid var(--mac-border);
+    border-radius: var(--radius-md);
+    padding: var(--input-padding);
+    background: #fff;
+}
+
+/* =============================
+    Блок .form-control-comment
+    Назначение: многострочное поле комментария (описание / аннотации репозитория).
+    Использование: форма создания репозитория.
+   ============================= */
+.form-control-comment {
+    width: 100%;
+    padding: var(--input-padding);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    border: 1px solid var(--mac-border);
+    border-radius: var(--radius-md);
+    padding: var(--input-padding);
+    background: #fff;
+    min-height: 214px;    /* Минимальная высота */
+    max-height: 500px;    /* Максимальная высота */
+}
+
+.form-select {
+    width: 100%;
+    padding: var(--input-padding);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    border: 1px solid var(--mac-border);
+    border-radius: var(--radius-md);
+    padding: var(--input-padding);
+    background: #fff;
+}
+/* =============================
+    Фокус .form-control / .form-select
+    Назначение: подсветка активного поля для доступности и фокуса пользователя.
+   ============================= */
+.form-control:focus,
+.form-select:focus {
+    outline: none;
+    border-color: var(--mac-accent);
+    box-shadow: var(--focus-ring);
+}
+
+/* Немного более жирный стиль для переключателей (Bootstrap switch: .form-check-input[role="switch"]) */
+.form-check-input[role="switch"] {
+    transform: scale(1.12);
+    transform-origin: left center;
+    /* чтобы масштабированный контрол не перекрывал label */
+    margin-left: 6px;
+}
+.form-check-input[role="switch"]:focus {
+    box-shadow: var(--focus-ring);
+}
+/* Сделать связанный label для переключателя более жирным (ожидается label сразу после input с .form-check-label) */
+.form-check-input[role="switch"] + .form-check-label {
+    font-weight: 600;
+    color: var(--color-text-dark);
+}
+
+/* Переопределение отступов Bootstrap, которые сдвигают переключатели/label вправо внутри боковых панелей.
+   Scoped to .side-window so global Bootstrap behavior remains intact elsewhere. */
+.side-window .form-switch {
+    padding-left: 0;
+}
+
+/* =============================
+    Блок .form-group
+    Назначение: вертикальный интервал между логическими группами полей.
+   ============================= */
+.form-group {
+    margin-bottom: 15px;
+}
+
+/* Контейнер, прижимающий кнопку вниз в колонке (использовать внутри .side-window) */
+.btn-container {
+    margin-top: auto;
+    /* по умолчанию выравнивание влево, можно переопределить при необходимости */
+}
+
+/* Сделать форму внутри side-window растягиваемой колонкой, чтобы кнопки с margin-top:auto прижимались вниз */
+.side-window form {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0; /* важно для корректной прокрутки внутри flex-контейнера */
+}
+
+/* В интерфейсе удаления основной .row должен растягиваться, чтобы кнопка внизу была прижата */
+.side-window > .row.delete-columns {
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+/* =============================
+    Блок label
+    Назначение: подписи к полям форм, повышают семантику и доступность.
+   ============================= */
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: var(--color-text-mid);
+}
+
+/* =============================
+    Блок .layout
+    Назначение: внешний flex-контейнер для двухпанельной раскладки (левая форма / правая панель).
+   ============================= */
+.layout {
+    display: flex; /* двухпанельная раскладка: форма слева, панель справа */
+    gap: 18px;
+    align-items: stretch; /* позволить колонкам растягиваться по высоте */
+    width: 100%;
+    /* высота контейнера: занимает доступное пространство viewport с запасом для header/padding */
+    min-height: calc(70vh - 90px);
+}
+
+/* =============================
+    Блок .main-pane
+    Назначение: левая колонка с основными формами действий.
+   ============================= */
+.main-pane {
+    flex: 0 0 30%;
+    display: flex;
+    flex-direction: column;
+    min-height: 0; /* важно для корректной прокрутки flex-children */
+}
+
+/* Если .side-window находится внутри .main-pane, заставим его заполнять высоту колонки
+   — это синхронизирует высоты левой и правой панелей при layout с align-items:stretch */
+.main-pane > .side-window {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* =============================
+    Блок .side-pane
+    Назначение: правая колонка с выводом команд и результатов.
+   ============================= */
+.side-pane {
+    flex: 1 1 68.7%;
+    display: flex;
+    flex-direction: column;
+    min-height: 0; /* позволяет дочерним элементам корректно растягиваться и прокручиваться */
+}
+
+/* =============================
+    Блок .side-window
+    Назначение: внутренняя «карточка» правой панели для визуального отделения.
+   ============================= */
+.side-window {
+    background: var(--color-bg-window);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-lg);
+    padding: 12px;
+    position: relative; /* не sticky — чтобы корректно занимать высоту flex-контейнера */
+    width: 100%;
+    height: 688px;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0; /* позволяет дочерним элементам занимать высоту */
+    overflow: hidden;
+}
+
+#users .side-window {
+    height: 62vh; /* 62% высоты вьюпорта */
+}
+
+#main .side-window {
+    height: 62vh; /* 62% высоты вьюпорта */
+}
+
+/* =============================
+    Блок .title
+    Назначение: заголовки секций панелей (например, "Команда", "Результат").
+   ============================= */
+.title {
+    font-weight: 600;
+    color: var(--color-text-dark);
+    margin-bottom: 8px;
+}
+
+/* =============================
+    Блок .window-header
+    Назначение: верхняя полоска заголовка контейнера (содержит статус/версию).
+   ============================= */
+.window-header {
+    height: var(--header-height);
+    background: linear-gradient(#ebecef, #dfe1e5);
+    border-bottom: 1px solid var(--mac-border);
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+}
+
+/* =============================
+    Блок .app-version
+    Назначение: метка версии приложения справа в header.
+   ============================= */
+.app-version {
+    letter-spacing: .5px;
+}
+
+/* =============================
+    Блок body
+    Назначение: фон страницы и базовая типографика.
+   ============================= */
+body {
+    background: linear-gradient(180deg, var(--body-grad-top) 0%, var(--body-grad-bottom) 100%);
+    min-height: 100vh;
+    font-family: var(--base-font);
+    padding: 20px;
+}
+
+/* =============================
+    Утилиты, добавленные при очистке inline-стилей
+   ============================= */
+.lang-link { position: absolute; top: 10px; left: 20px; }
+#lang_select { font-size: 13px; vertical-align: middle; }
+.logout-link { position: absolute; top: 10px; right: 20px; }
+.btn-column { display:flex; flex-direction:column; gap:6px; align-items:flex-start; }
+.form-switch-tight { margin:0; gap:0.6rem; }
+.main-pane--full { flex: 0 0 100%; }
+.gutter-16 { --bs-gutter-x: 16px; }
+.content--max1100 { max-width: 1100px; margin: auto; }
+.side-window--mt30 { margin-top: 30px; }
+.inline-form-btn { display: inline; margin-left: 10px; }
+.pre-line { white-space: pre-line; }
+
+/* Небольшая правка для метки версии приложения */
+.app-version { font-size: 12px; font-weight: 600; color: #555; }
+
+.header-link { font-size:14px; color:#555; text-decoration:none; }
+.header-link--mr { margin-right: 15px; }
+.tab-content--mb20 { margin-bottom: 20px; }
+.label-mt8 { margin-top: 8px; display: block; }
+.layout--mt30 { margin-top: 30px; }
+
+
+/* =============================
+    Селектор body,input,button,select
+    Назначение: выравнивание шрифта интерфейсных элементов с body.
+   ============================= */
+body,
+input,
+button,
+select {
+    font-family: var(--base-font);
+}
+
+/* =============================
+    Блок .aptly-list
+    Назначение: списки (репозитории, пакеты, версии) во вкладке удаления.
+   ============================= */
+.aptly-list {
+    height: var(--list-height);    /* фиксированная высота */
+    min-height: var(--list-height);    /* подстраховка против сжатия */
+    overflow-y: auto;    /* скролл при переполнении */
+    border: 1px solid var(--mac-border);
+    border-radius: 8px;
+    padding: 0;
+    background: #f5f5f5;
+    font-size: 14px;
+}
+
+/* =============================
+    Блок .aptly-list li
+    Назначение: интерактивный элемент списка для выбора.
+   ============================= */
+.aptly-list li {
+    cursor: pointer;
+    user-select: none;
+    border: 0;
+    border-bottom: 1px solid #e2e3e5;
+    padding: 6px 10px;
+    background: #fff;
+    list-style: none;
+}
+
+/* =============================
+    Последний элемент .aptly-list li:last-child
+    Назначение: убрать нижнюю границу визуально.
+   ============================= */
+.aptly-list li:last-child {
+    border-bottom: 0;
+}
+
+/* =============================
+    Hover .aptly-list li
+    Назначение: подсветка строки при наведении.
+   ============================= */
+.aptly-list li:hover {
+    background: #f0f6ff;
+}
+
+/* =============================
+    Active .aptly-list li.active
+    Назначение: состояние выбранного элемента списка.
+   ============================= */
+.aptly-list li.active {
+    background: var(--selection-bg);
+    color: var(--selection-fg);
+}
+
+/* =============================
+    Блок .list-filter
+    Назначение: поля фильтра над списками удаления.
+   ============================= */
+.list-filter {
+    margin-bottom: 6px;
+}
+
+/* =============================
+    Блок #delete_submit
+    Назначение: основная кнопка удаления (красная) на вкладке Delete.
+   ============================= */
+#delete_submit {
+    background: #dc3545;
+}
+
+/* =============================
+    Hover #delete_submit:hover:not(:disabled)
+    Назначение: усиление цвета при наведении если кнопка активна.
+   ============================= */
+#delete_submit:hover:not(:disabled) {
+    background: var(--color-danger-hover);
+}
+
+/* =============================
+    Блок .btn-success
+    Назначение: зелёные кнопки (успешные действия, подтверждения копирования/создания).
+   ============================= */
+.btn-success {
+    background: var(--color-success);
+    border: none;
+}
+
+/* =============================
+    Hover .btn-success:hover
+    Назначение: визуальная реакция наведения для кнопок успеха.
+   ============================= */
+.btn-success:hover {
+    background: var(--color-success-hover);
+}
+
+/* =============================
+    Active .btn-success:active
+    Назначение: состояние удержания/нажатия зелёной кнопки.
+   ============================= */
+.btn-success:active {
+    background: var(--color-success-active);
+}
+
+/* =============================
+    Disabled кнопок (.btn:disabled / fieldset:disabled .btn)
+    Назначение: единый стиль выключенных кнопок независимо от варианта.
+   ============================= */
+.btn:disabled,
+.btn.disabled,
+fieldset:disabled .btn {
+    background: #b5b5b5 !important;
+    color: #ffffff !important;
+    cursor: not-allowed;
+    border: none;
+    opacity: 1;
+}
+
+/* =============================
+    Блок .btn-danger
+    Назначение: красные кнопки (операции риска: удаление).
+   ============================= */
+.btn-danger {
+    background: var(--color-danger);
+    border: none;
+}
+
+/* =============================
+    Hover .btn-danger:hover
+    Назначение: визуальное усиление при наведении.
+   ============================= */
+.btn-danger:hover {
+    background: var(--color-danger-hover);
+}
+
+/* =============================
+    Active .btn-danger:active
+    Назначение: состояние удержания красной кнопки.
+   ============================= */
+.btn-danger:active {
+    background: var(--color-danger-active);
+}
+
+
+/* =============================
+    Блок #confirm_delete_pack_btn
+    Назначение: красная кнопка подтверждения в модальном диалоге удаления.
+   ============================= */
+#confirm_delete_pack_btn {
+    background: var(--color-danger);
+}
+
+/* =============================
+    Hover #confirm_delete_pack_btn:hover
+    Назначение: подсветка кнопки модального подтверждения при наведении.
+   ============================= */
+#confirm_delete_pack_btn:hover {
+    background: var(--color-danger-hover);
+}
+
+/* =============================
+    Блок .nav-tabs .nav-link
+    Назначение: внешний вид неактивных вкладок навигации.
+   ============================= */
+.nav-tabs .nav-link {
+    color: var(--color-text-muted);
+}
+
+/* =============================
+    Hover .nav-tabs .nav-link:hover
+    Назначение: изменение цвета текста при наведении.
+   ============================= */
+.nav-tabs .nav-link:hover {
+    color: #444;
+}
+
+/* =============================
+    Active вкладок (.nav-tabs .nav-link.active)
+    Назначение: подсветка активной вкладки, акцентирует текущую секцию.
+   ============================= */
+.nav-tabs .nav-link.active,
+.nav-tabs .nav-item.show .nav-link {
+    color: var(--selection-bg);
+    font-weight: 600;
+}
+
+/* =============================
+    Блок .filter-dropdown-wrapper
+    Выпадающий список с отдельным полем фильтра.
+    Назначение: позиционирование относительного контейнера кастомного выпадающего списка.
+   ============================= */
+.filter-dropdown-wrapper {
+    position: relative;
+}
+
+/* =============================
+    Блок .filter-dropdown-panel
+    Назначение: панель со значениями и строкой поиска (скрыта по умолчанию).
+   ============================= */
+.filter-dropdown-panel {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: #fff;
+    border: 1px solid var(--mac-border);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px #0000001f;
+    padding: 6px 6px 4px 6px;
+    margin-top: 4px;
+    display: none;
+}
+
+/* =============================
+    Состояние .filter-dropdown-panel.open
+    Назначение: отображение панели при активном фильтре.
+   ============================= */
+.filter-dropdown-panel.open {
+    display: block;
+}
+
+/* =============================
+    Блок .filter-dropdown-search
+    Назначение: поле ввода быстрого фильтра значений.
+   ============================= */
+.filter-dropdown-search {
+    margin-bottom: 4px;
+}
+
+/* =============================
+    Блок .filter-dropdown-list
+    Назначение: контейнер списка опций с ограниченной высотой и прокруткой.
+   ============================= */
+.filter-dropdown-list {
+    max-height: 220px;
+    overflow-y: auto;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* =============================
+    Блок .filter-dropdown-list li
+    Назначение: отдельная опция в кастомном выпадающем списке.
+   ============================= */
+.filter-dropdown-list li {
+    padding: 4px 8px;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+/* =============================
+    Hover .filter-dropdown-list li:hover
+    Назначение: подсветка опции при наведении.
+   ============================= */
+.filter-dropdown-list li:hover {
+    background: #f0f6ff;
+}
+
+/* =============================
+    Active .filter-dropdown-list li.active
+    Назначение: выделение выбранной опции.
+   ============================= */
+.filter-dropdown-list li.active {
+    background: var(--selection-bg);
+    color: var(--selection-fg);
+}
+
+/* =============================
+    Блок .filter-dropdown-empty
+    Назначение: сообщение «Нет совпадений» при пустой выборке фильтра.
+   ============================= */
+.filter-dropdown-empty {
+    padding: 6px 4px;
+    font-size: 13px;
+    color: #666;
+}
+
+/* =============================
+    Плавающие уведомления (balloons)
+    Используются для показа временных сообщений (flash) в виде небольших "шариков"
+    в правом нижнем углу экрана. Закрываются вручную и автоматически через таймаут.
+    ============================= */
+.balloon-container {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    top: auto;
+    z-index: 1200;
+    display: flex;
+    /* визуальный стек снизу вверх */
+    flex-direction: column-reverse;
+    gap: 8px;
+    align-items: flex-end;
+}
+.balloon {
+    min-width: 220px;
+    max-width: 420px;
+    background: #fff;
+    color: var(--color-text-dark);
+    border-radius: 12px;
+    padding: 10px 14px;
+    box-shadow: 0 8px 20px #0000001f;
+    border: 1px solid #0000000f;
+    /* стартуем немного ниже (для анимации появления снизу) */
+    transform: translateY(8px) scale(0.98);
+    opacity: 0;
+    transition: opacity .22s ease, transform .22s cubic-bezier(.2,.9,.3,1);
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.balloon.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+.balloon .balloon-close {
+    margin-left: auto;
+    border: none;
+    background: transparent;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    color: #00000099;
+}
+.balloon.info { background: #e9f5ff; border-color: #cfeeff; }
+.balloon.success { background: #e9fbe9; border-color: #c8f0c9; }
+.balloon.danger { background: #fff0f0; border-color: #ffcfcf; }
+.balloon.warning { background: #fff9eb; border-color: #ffedc2; }
+.balloon .balloon-icon { width:20px; height:20px; display:inline-block; flex:0 0 20px; }
+
+/* =============================
+    Иконка помощи (маленький круг с вопросом) рядом с label
+    Пример в разметке: <label>Пароль <span class="help-icon" data-help="Подсказка по паролю"></span></label>
+    Текст тултипа берётся из атрибута data-help.
+   ============================= */
+.help-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: var(--color-bg-command);
+    color: #333;
+    font-size: 12px;
+    line-height: 1;
+    cursor: pointer;
+    border: 1px solid #0000000f;
+    margin-left: 8px; /* поставить иконку справа от текста label */
+    flex: 0 0 20px;
+}
+.help-icon:after {
+    content: '?';
+    display: block;
+    transform: translateY(-1px);
+}
+.help-tooltip {
+    position: absolute;
+    z-index: 1400;
+    max-width: 320px;
+    background: var(--color-bg-command);
+    border: 1px solid var(--mac-border);
+    border-radius: 6px;
+    padding: 8px 10px;
+    box-shadow: 0 6px 18px #0000001f;
+    font-size: 13px;
+    color: var(--color-text-dark);
+}
+.help-tooltip:before {
+    content: '';
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: var(--color-bg-command);
+    transform: rotate(45deg);
+    border-left: 1px solid var(--mac-border);
+    border-top: 1px solid var(--mac-border);
+    left: 12px;
+    top: -6px;
+}
+
+/* Утилиты, вынесенные из шаблонов */
+.lang-link {
+    position: absolute;
+    top: 10px;
+    left: 20px;
+}
+
+#lang_select {
+    font-size: 13px;
+    vertical-align: middle;
+}
+
+.logout-link {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+}
+
+/* Переопределение стиля версии приложения для соответствия шаблону */
+.app-version {
+    font-size: 12px;
+    font-weight: 600;
+    color: #555;
+    margin-right: auto;
+}
+
+/* Отступ снизу для контента вкладок */
+#aptlyTabContent {
+    margin-bottom: 20px;
+}
+
+/* Помощник для сохранения перевода строк (эквивалент inline white-space: pre-line) */
+.pre-line {
+    white-space: pre-line;
+}
+
+/* Колонка кнопок, используемая в некоторых формах */
+.btn-column {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-start;
+}
+
+/* Немного плотная раскладка переключателей, используемая в шаблонах */
+.form-switch-tight {
+    margin: 0;
+    gap: 0.6rem;
+    display: flex;
+    align-items: center;
+}
+
+/* Модификатор для основного блока — занимает всю ширину (используется в представлении удаления) */
+.main-pane--full {
+    flex: 0 0 100%;
+}
+
+/* Утилита для установки локального gutter Bootstrap */
+.gutter-16 {
+    --bs-gutter-x: 16px;
+}
+
+.side-window--mt30 {
+    margin-top: 30px;
+}
+
+.content--max1100 {
+    max-width: 1100px;
+    margin: auto;
+}
+
+.inline-form-btn {
+    display: inline;
+    margin-left: 10px;
+}
+
+.hidden-by-default {
+    display: none;
+}
+
+/* Конец утилит */

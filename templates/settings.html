@@ -1,0 +1,581 @@
+<!-- settings.html -->
+
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <title>{{ _t('settings.title') }} Aptly-UI</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+    <div class="aptly-container">
+        <div class="window-header d-flex align-items-center justify-content-between">
+            <div class="app-version">{{ _t('settings.title') }}</div>
+            <div class="logout-link">
+                <a href="/" class="header-link header-link--mr">{{ _t('nav.home') }}</a>
+                <a href="/logout" class="header-link">{{ _t('nav.logout') }}</a>
+            </div>
+        </div>
+    <div class="content content--max1100">
+    <!-- Убедиться, что глобальный контейнер для balloon присутствует на странице -->
+        {% include '_flash.html' %}
+            <div class="side-window side-window--mt30">
+                    <ul class="nav nav-tabs mb-3" id="settingsTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button
+                                class="nav-link active"
+                                id="main-tab"
+                                data-bs-toggle="tab"
+                                data-bs-target="#main"
+                                type="button"
+                                role="tab"
+                                aria-controls="main"
+                                aria-selected="true">
+                                {{ _t('settings.title') }}
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button
+                                class="nav-link"
+                                id="users-tab"
+                                data-bs-toggle="tab"
+                                data-bs-target="#users"
+                                type="button"
+                                role="tab"
+                                aria-controls="users"
+                                aria-selected="false">
+                                {{ _t('settings.tab.users') }}
+                            </button>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="settingsTabContent">
+                        <div class="tab-pane fade show active" id="main" role="tabpanel" aria-labelledby="main-tab">
+                            <div class="side-window side-window--mt30">
+                                <form method="post" action="/settings" autocomplete="off">
+                                    <div class="row g-3 align-items-center mb-2">
+                                        <div class="col-4 text-end"><label class="form-label">
+                                            {{ _t('settings.api_url','URL Aptly API') }}</label>
+                                        </div>
+                                        <div class="col-8"><input type="text" name="API_URL"
+                                                value="{{ config.API_URL }}" class="form-control" required></div>
+                                    </div>
+                                    <div class="row g-3 align-items-center mb-2">
+                                        <div class="col-4 text-end"><label class="form-label">
+                                            {{ _t('settings.publish_arch') }}</label></div>
+                                        <div class="col-8"><input type="text" name="PUBLISH_ARCH"
+                                                value="{{ config.PUBLISH_ARCH }}" class="form-control"></div>
+                                    </div>
+                                    <div class="row g-3 align-items-center mb-2">
+                                        <div class="col-4 text-end"><label class="form-label">
+                                            {{ _t('settings.publish_origin') }}</label>
+                                        </div>
+                                        <div class="col-8"><input type="text" name="PUBLISH_ORIGIN"
+                                                value="{{ config.PUBLISH_ORIGIN }}" class="form-control"></div>
+                                    </div>
+                                    <div class="row g-3 align-items-center mb-2">
+                                        <div class="col-4 text-end"><label class="form-label">
+                                            {{ _t('settings.publish_label') }}</label>
+                                        </div>
+                                        <div class="col-8"><input type="text" name="PUBLISH_LABEL"
+                                                value="{{ config.PUBLISH_LABEL }}" class="form-control"></div>
+                                    </div>
+                    <div class="row g-3 align-items-center mb-2">
+                    <div class="col-4 text-end"><label class="form-label">
+                        {{ _t('settings.allowed_codenames') }}</label></div>
+                    <div class="col-8"><input type="text" name="ALLOWED_CODENAME"
+                        value="{{ config.ALLOWED_CODENAME }}" class="form-control"></div>
+                    </div>
+                                    <div class="row g-3 align-items-center mb-2">
+                                        <div class="col-4 text-end"><label class="form-label">
+                                            {{ _t('settings.log_level') }}</label></div>
+                                        <div class="col-8">
+                                            <select name="LOG_LEVEL" class="form-select">
+                                                <option value="DEBUG" {% if config.LOG_LEVEL=='DEBUG' %}selected{% endif
+                                                    %}>DEBUG</option>
+                                                <option value="INFO" {% if config.LOG_LEVEL=='INFO' %}selected{% endif
+                                                    %}>INFO</option>
+                                                <option value="WARNING" {% if config.LOG_LEVEL=='WARNING' %}selected{%
+                                                    endif %}>WARNING</option>
+                                                <option value="ERROR" {% if config.LOG_LEVEL=='ERROR' %}selected{% endif
+                                                    %}>ERROR</option>
+                                                <option value="CRITICAL" {% if config.LOG_LEVEL=='CRITICAL' %}selected{%
+                                                    endif %}>CRITICAL</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row g-3 align-items-center mb-2">
+                                        <div class="col-4 text-end"><label class="form-label">
+                                            {{ _t('settings.log_max_bytes') }}</label></div>
+                                        <div class="col-8"><input type="text" name="LOG_MAX_BYTES"
+                                                value="{{ config.LOG_MAX_BYTES }}" class="form-control"></div>
+                                    </div>
+                                    <div class="row g-3 align-items-center mb-2">
+                                        <div class="col-4 text-end"><label class="form-label">
+                                            {{ _t('settings.log_backup_count') }}</label></div>
+                                        <div class="col-8"><input type="text" name="LOG_BACKUP_COUNT"
+                                                value="{{ config.LOG_BACKUP_COUNT }}" class="form-control"></div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col-4"></div>
+                    <div class="col-8"><button type="submit"
+                        class="btn btn-primary">{{ _t('btn.save') }}</button></div>
+                                    </div>
+                                </form>
+                                <!-- сообщения сервера будут показаны как balloons через глобальный контейнер -->
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="users" role="tabpanel" aria-labelledby="users-tab">
+                            <div class="layout layout--mt30">
+                                <div class="main-pane">
+                                    <div class="side-window">
+                                        <h5>{{ _t('settings.users.create_title') }}</h5>
+                                        <form method="post" action="/add_user" autocomplete="off" id="add_user_form">
+                                            <div class="mb-3">
+                                                <input
+                                                    type="text"
+                                                    class="form-control"
+                                                    id="new_username"
+                                                    name="username"
+                                                    placeholder="{{ _t('label.username') }}"
+                                                    required>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <input
+                                                    type="password"
+                                                    class="form-control"
+                                                    id="new_password"
+                                                    name="password"
+                                                    placeholder="{{ _t('label.password') }}"
+                                                    required>
+                                            </div>
+
+                                            <div class="mb-3">
+                                                <input
+                                                    type="password"
+                                                    class="form-control"
+                                                    id="confirm_password"
+                                                    name="confirm_password"
+                                                    placeholder="{{ _t('label.confirm_password') }}"
+                                                    required>
+                                            </div>
+
+                                            <div class="mb-3 form-check form-switch d-flex form-switch-tight">
+                                                <input
+                                                    type="checkbox"
+                                                    class="form-check-input"
+                                                    id="is_root"
+                                                    name="is_root"
+                                                    role="switch"
+                                                    aria-checked="false">
+                                                <label
+                                                    class="form-check-label mb-0"
+                                                    for="is_root">
+                                                    {{ _t('settings.users.full_rights') }}
+                                                </label>
+                                            </div>
+
+                                            <div class="mb-3 form-check form-switch d-flex form-switch-tight">
+                                                <input
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                    id="perm_copy"
+                                                    name="perm_copy"
+                                                    role="switch"
+                                                    aria-checked="false">
+                                                <label
+                                                    class="form-check-label mb-0"
+                                                    for="perm_copy">
+                                                    {{ _t('tab.copy') }}
+                                                </label>
+                                            </div>
+
+                                            <div class="mb-3 form-check form-switch d-flex form-switch-tight">
+                                                <input
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                    id="perm_upload"
+                                                    name="perm_upload"
+                                                    role="switch"
+                                                    aria-checked="false">
+                                                <label
+                                                    class="form-check-label mb-0"
+                                                    for="perm_upload">
+                                                    {{ _t('tab.upload') }}
+                                                </label>
+                                            </div>
+
+                                            <div class="mb-3 form-check form-switch d-flex form-switch-tight">
+                                                <input
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                    id="perm_delete"
+                                                    name="perm_delete"
+                                                    role="switch"
+                                                    aria-checked="false">
+                                                <label
+                                                    class="form-check-label mb-0"
+                                                    for="perm_delete">
+                                                    {{ _t('tab.delete') }}
+                                                </label>
+                                            </div>
+
+                                            <div class="mb-3 form-check form-switch d-flex form-switch-tight">
+                                                <input
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                    id="perm_create"
+                                                    name="perm_create"
+                                                    role="switch"
+                                                    aria-checked="false">
+                                                <label
+                                                    class="form-check-label mb-0"
+                                                    for="perm_create">
+                                                    {{ _t('tab.create') }}
+                                                </label>
+                                            </div>
+
+                                            <div class="mb-3 form-check form-switch d-flex form-switch-tight">
+                                                <input
+                                                    class="form-check-input" type="checkbox"
+                                                    id="perm_delete_repo" name="perm_delete_repo"
+                                                    role="switch" aria-checked="false">
+                                                <label
+                                                    class="form-check-label mb-0"
+                                                    for="perm_delete_repo">
+                                                    {{ _t('tab.delete_repo') }}
+                                                </label>
+                                            </div>
+
+                                            <div class="btn-container">
+                                                <button
+                                                    type="submit"
+                                                    class="btn btn-success"
+                                                    id="add_user_btn">
+                                                    {{ _t('btn.create') }}
+                                                </button>
+                                            </div>
+                                        </form>
+                                        <!-- сообщения сервера будут показаны как balloons через глобальный контейнер -->
+                                        <script>
+                                            // Получить список пользователей из backend (рендерим в JS)
+                                            let existingUsers = {{ users_list | tojson }} || [];
+
+                                            const usernameInput = document.getElementById('new_username');
+                                            const passwordInput = document.getElementById('new_password');
+                                            const confirmInput = document.getElementById('confirm_password');
+                                            const addUserBtn = document.getElementById('add_user_btn');
+
+                                            function validateUserForm() {
+                                                let valid = true;
+                                                // Проверка логина
+                                                if (existingUsers.includes(usernameInput.value.trim())) {
+                                                    usernameInput.style.backgroundColor = '#ffd6d6';
+                                                    valid = false;
+                                                } else {
+                                                    usernameInput.style.backgroundColor = '';
+                                                }
+                                                // Проверка совпадения паролей
+                                                if (passwordInput.value !== confirmInput.value || passwordInput.value === "") {
+                                                    confirmInput.style.backgroundColor = '#ffd6d6';
+                                                    valid = false;
+                                                } else {
+                                                    confirmInput.style.backgroundColor = '';
+                                                }
+                                                // Проверка, что хотя бы один переключатель прав включен
+                                                const hasPermission = document.getElementById('is_root').checked ||
+                                                                     document.getElementById('perm_copy').checked ||
+                                                                     document.getElementById('perm_create').checked ||
+                                                                     document.getElementById('perm_delete').checked ||
+                                                                     document.getElementById('perm_delete_repo').checked ||
+                                                                     document.getElementById('perm_upload').checked;
+                                                if (!hasPermission) {
+                                                    valid = false;
+                                                }
+                                                addUserBtn.disabled = !valid;
+                                            }
+
+                                            usernameInput.addEventListener('input', validateUserForm);
+                                            passwordInput.addEventListener('input', validateUserForm);
+                                            confirmInput.addEventListener('input', validateUserForm);
+                                            document.addEventListener('DOMContentLoaded', function() {
+                                                // По-умолчанию у нового пользователя включено только удаление
+                                                document.getElementById('perm_delete').checked = false;
+                                                document.getElementById('perm_copy').checked = true;
+                                                document.getElementById('perm_create').checked = false;
+                                                document.getElementById('perm_delete_repo').checked = false;
+                                                document.getElementById('perm_upload').checked = false;
+                                                validateUserForm();
+                                            });
+
+                                            // Если поставили Полные права — отмечаем все и делаем их доступными
+                                            document.getElementById('is_root').addEventListener('change', function() {
+                                                const checked = this.checked;
+                                                ['perm_copy','perm_create','perm_delete','perm_delete_repo','perm_upload'].forEach(id => {
+                                                    const el = document.getElementById(id);
+                                                    if (!el) return;
+                                                    el.checked = checked;
+                                                    el.disabled = checked;
+                                                });
+                                            });
+                                        </script>
+                                    </div>
+                                </div>
+                                <aside class="side-pane">
+                                    <div class="side-window">
+                                        <h5>{{ _t('settings.users.list_title') }}</h5>
+                                        <ul class="list-group user-list">
+                                            {% for username, info in users.items() %}
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <strong>{{ username }}</strong>
+                                                    {% if users[username].is_root() %}
+                                                        <span class="badge bg-success ms-2">
+                                                            {{ _t('settings.users.admin') }}
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="badge bg-secondary ms-2">
+                                                            {{ _t('settings.users.user') }}
+                                                        </span>
+                                                    {% endif %}
+                                                </div>
+                                                <div>
+                                                    <button
+                                                        type="button"
+                                                        class="btn btn-secondary btn-sm edit-user-btn" data-username="{{ username }}">
+                                                        {{ _t('btn.edit') }}</button>
+                                                    {% if username != 'admin' %}
+                                                    <form
+                                                        method="post" action="/delete_user"
+                                                        class="confirm-delete-form"
+                                                        style="display:inline; margin-left:10px;"
+                                                        data-username="{{ username }}"
+                                                        data-confirm="{{ _t('confirm.delete_user') }}">
+                                                        <input type="hidden" name="username" value="{{ username }}">
+                                                        <button
+                                                            type="submit"
+                                                            class="btn btn-danger btn-sm">
+                                                            {{ _t('btn.delete') }}
+                                                        </button>
+                                                    </form>
+                                                    {% endif %}
+                                                </div>
+                                            </li>
+                                            {% endfor %}
+                                        </ul>
+                                        <script>
+                                            // Добавить обработчик подтверждения для форм удаления пользователей
+                                            document.addEventListener('DOMContentLoaded', function() {
+                                                document.querySelectorAll('.confirm-delete-form').forEach(function(form) {
+                                                    form.addEventListener('submit', function(e) {
+                                                        e.preventDefault();
+                                                        const username = form.dataset.username || form.querySelector('input[name="username"]').value || '';
+                                                        const base = form.dataset.confirm || '';
+                                                        const msg = base + ' ' + username + '?';
+                                                        if (confirm(msg)) {
+                                                            form.submit();
+                                                        }
+                                                    });
+                                                });
+                                            });
+                                        </script>
+                                    </div>
+                                </aside>
+                            </div>
+                        </div>
+                    </div>
+                    <script>
+                        // Сохраняем активную вкладку в localStorage и восстанавливаем при загрузке
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const tabEls = document.querySelectorAll('#settingsTab .nav-link');
+                            tabEls.forEach(function(tabEl) {
+                                tabEl.addEventListener('click', function() {
+                                    localStorage.setItem('settings_active_tab', tabEl.id);
+                                });
+                            });
+                                const savedTab = localStorage.getItem('settings_active_tab');
+                                // Если сервер запросил конкретную вкладку (через ?tab=users), предпочесть её и активировать
+                                const serverTab = '{{ tab }}';
+                                if (serverTab) {
+                                    const serverTabId = serverTab + '-tab';
+                                    const tabToActivate = document.getElementById(serverTabId);
+                                    if (tabToActivate) {
+                                        try { new bootstrap.Tab(tabToActivate).show(); localStorage.setItem('settings_active_tab', serverTabId); } catch (e) { tabToActivate.click(); }
+                                    }
+                                } else if (savedTab) {
+                                    const tabToActivate = document.getElementById(savedTab);
+                                    if (tabToActivate) tabToActivate.click();
+                                }
+                        });
+                    </script>
+
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/aptly-ui.js"></script>
+    <script src="/static/balloons.js"></script>
+    <!-- Заполнитель серверных сообщений обрабатывается /static/balloons.js -->
+    {% set _flashed = get_flashed_messages(with_categories=true) %}
+    {% if _flashed %}
+        {% set _cat, _msg = _flashed[0] %}
+        <div id="server-message" data-message="{{ _msg|e }}" data-category="{{ (_cat or 'info')|e }}" data-tab="{{ tab|e }}"></div>
+    {% else %}
+        <div id="server-message" data-message="" data-category="info" data-tab="{{ tab|e }}"></div>
+    {% endif %}
+        <!-- Модальное окно редактирования пользователя -->
+        <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form id="edit_user_form" method="post" action="/edit_user" autocomplete="off">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="editUserModalLabel">
+                                {{ _t('settings.users.edit_title') }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ _t('btn.close') }}"></button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" name="username" id="edit_username_input">
+                            <div class="mb-3">
+                                <label for="edit_password" class="form-label">
+                                    {{ _t('settings.users.new_password') }}</label>
+                                <input type="password" class="form-control" id="edit_password" name="password">
+                            </div>
+                            <div class="mb-3">
+                                <label for="edit_confirm_password" class="form-label">
+                                    {{ _t('label.confirm_password') }}</label>
+                                <input type="password" class="form-control" id="edit_confirm_password" name="confirm_password">
+                            </div>
+                            <div class="mb-3 form-check form-switch d-flex form-switch-tight">
+                                <input type="checkbox" class="form-check-input" id="edit_is_root" name="is_root">
+                                <label class="form-check-label mb-0" for="edit_is_root">
+                                    {{ _t('settings.users.full_rights') }}</label>
+                            </div>
+                            <div class="mb-3 form-check form-switch d-flex form-switch-tight">
+                                <input class="form-check-input" type="checkbox" id="edit_perm_copy" name="perm_copy">
+                                <label class="form-check-label mb-0" for="edit_perm_copy">
+                                    {{ _t('tab.copy') }}</label>
+                            </div>
+                            <div class="mb-3 form-check form-switch d-flex form-switch-tight">
+                                <input class="form-check-input" type="checkbox" id="edit_perm_create" name="perm_create">
+                                <label class="form-check-label mb-0" for="edit_perm_create">
+                                    {{ _t('tab.create') }}</label>
+                            </div>
+                            <div class="mb-3 form-check form-switch d-flex form-switch-tight">
+                                <input class="form-check-input" type="checkbox" id="edit_perm_delete" name="perm_delete">
+                                <label class="form-check-label mb-0" for="edit_perm_delete">
+                                    {{ _t('tab.delete') }}</label>
+                            </div>
+                            <div class="mb-3 form-check form-switch d-flex form-switch-tight">
+                                <input class="form-check-input" type="checkbox" id="edit_perm_delete_repo" name="perm_delete_repo">
+                                <label class="form-check-label mb-0" for="edit_perm_delete_repo">
+                                    {{ _t('tab.delete_repo') }}</label>
+                            </div>
+                            <div class="mb-3 form-check form-switch d-flex form-switch-tight">
+                                <input class="form-check-input" type="checkbox" id="edit_perm_upload" name="perm_upload">
+                                <label class="form-check-label mb-0" for="edit_perm_upload">
+                                    {{ _t('tab.upload') }}</label>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                {{ _t('btn.cancel') }}</button>
+                            <button type="submit" class="btn btn-primary" id="edit_user_submit">
+                                {{ _t('btn.save') }}</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+                const editBtns = document.querySelectorAll('.edit-user-btn');
+                const editModalEl = document.getElementById('editUserModal');
+                const bsEditModal = new bootstrap.Modal(editModalEl);
+                const editUsernameInput = document.getElementById('edit_username_input');
+                const editPassword = document.getElementById('edit_password');
+                const editConfirm = document.getElementById('edit_confirm_password');
+                const editSubmit = document.getElementById('edit_user_submit');
+
+                function validateEditForm() {
+                    let valid = true;
+                    // Если пароль указан — проверяем совпадение и непустоту
+                    if (editPassword.value || editConfirm.value) {
+                        valid = editPassword.value !== '' && editPassword.value === editConfirm.value;
+                        editConfirm.style.backgroundColor = valid ? '' : '#ffd6d6';
+                    } else {
+                        editConfirm.style.backgroundColor = '';
+                        valid = true; // не меняем пароль — разрешаем
+                    }
+                    editSubmit.disabled = !valid;
+                }
+
+                // Загружаем информацию о пользователях из API для предварительного заполнения формы редактирования
+                let usersInfo = {};
+                fetch('/api/users', {credentials: 'same-origin'})
+                    .then(r => r.ok ? r.json() : {})
+                    .then(j => { usersInfo = j || {}; })
+                    .catch(() => { usersInfo = {}; });
+
+                editBtns.forEach(btn => {
+                        btn.addEventListener('click', function() {
+                                const username = this.getAttribute('data-username');
+                                editUsernameInput.value = username;
+                                editPassword.value = '';
+                                editConfirm.value = '';
+                                // Сброс полей прав и is_root
+                                document.getElementById('edit_is_root').checked = false;
+                                ['edit_perm_copy','edit_perm_create','edit_perm_delete','edit_perm_delete_repo','edit_perm_upload'].forEach(id => {
+                                    const el = document.getElementById(id);
+                                    if (el) el.checked = false;
+                                });
+                                // Если данные о пользователе получены — заполним
+                                if (usersInfo && usersInfo[username]) {
+                                    const info = usersInfo[username];
+                                    const rootVal = Number(info.root || 0);
+                                    document.getElementById('edit_is_root').checked = rootVal === 1;
+                                    const perms = info.perms || {};
+                                    document.getElementById('edit_perm_copy').checked = !!perms.copy;
+                                    document.getElementById('edit_perm_create').checked = !!perms.create;
+                                    document.getElementById('edit_perm_delete').checked = !!perms.delete;
+                                    document.getElementById('edit_perm_delete_repo').checked = !!perms.delete_repo;
+                                    document.getElementById('edit_perm_upload').checked = !!perms.upload;
+                                    // Если это root — заблокируем чекбоксы
+                                    if (rootVal === 1) {
+                                        ['edit_perm_copy','edit_perm_create','edit_perm_delete','edit_perm_delete_repo','edit_perm_upload'].forEach(id => {
+                                            const el = document.getElementById(id);
+                                            if (el) el.disabled = true;
+                                        });
+                                    } else {
+                                        ['edit_perm_copy','edit_perm_create','edit_perm_delete','edit_perm_delete_repo','edit_perm_upload'].forEach(id => {
+                                            const el = document.getElementById(id);
+                                            if (el) el.disabled = false;
+                                        });
+                                    }
+                                }
+                                validateEditForm();
+                                bsEditModal.show();
+                        });
+                });
+
+                // Когда меняем is_root в форме редактирования — отмечаем/блокируем чекбоксы
+                document.getElementById('edit_is_root').addEventListener('change', function() {
+                    const checked = this.checked;
+                    ['edit_perm_copy','edit_perm_create','edit_perm_delete','edit_perm_delete_repo','edit_perm_upload'].forEach(id => {
+                        const el = document.getElementById(id);
+                        if (!el) return;
+                        el.checked = checked;
+                        el.disabled = checked;
+                    });
+                });
+
+                editPassword.addEventListener('input', validateEditForm);
+                editConfirm.addEventListener('input', validateEditForm);
+        });
+        </script>
+</body>
+
+</html>
